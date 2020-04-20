@@ -11,7 +11,7 @@ Arduino UNO Software for the Open.Theremin
 (*) This relies on a recent gcc compiler version. Make sure to compile it with the Arduino IDE >= 1.8.10
 
 ### Don't click on the files!
-Click on the "Download ZIP" Button to the right or [Click here](https://github.com/GaudiLabs/OpenTheremin_V3/archive/master.zip) 
+Click on the "Download ZIP" Button to the right or [Click here](/archive/master.zip) 
 Then unpack the archive.
 
 ### Open Source Theremin based on the Arduino Platform
