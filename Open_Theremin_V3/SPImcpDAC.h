@@ -24,10 +24,14 @@
 #define MCP_DAC2_CS_DDR DDRB
 #define MCP_DAC2_CS_PORT PORTB
 #define MCP_DAC2_CS_BIT 1
+// Data direction & Port register & Bit number for DAC2 CS
+#define MCP_DAC3_CS_DDR DDRB
+#define MCP_DAC3_CS_PORT PORTB
+#define MCP_DAC3_CS_BIT 4
 // Data direction & Port registers & Bit numbers for Hardware SPI
 #define HW_SPI_DDR DDRB
 #define HW_SPI_SCK_BIT 5
-#define HW_SPI_MISO_BIT 4 // unused in this configuration
+// #define HW_SPI_MISO_BIT 4 // re-used for DAC3 chip select
 #define HW_SPI_MOSI_BIT 3
 
 static inline void SPImcpDACinit()
@@ -40,6 +44,8 @@ static inline void SPImcpDACinit()
 	MCP_DAC_CS_PORT  |= _BV(MCP_DAC_CS_BIT);
 	MCP_DAC2_CS_DDR  |= _BV(MCP_DAC2_CS_BIT);
 	MCP_DAC2_CS_PORT |= _BV(MCP_DAC2_CS_BIT);
+	MCP_DAC3_CS_DDR |= _BV(MCP_DAC3_CS_BIT);
+	MCP_DAC3_CS_PORT |= _BV(MCP_DAC3_CS_BIT);
 	// initialize the hardware SPI pins:
 	HW_SPI_DDR |= _BV(HW_SPI_SCK_BIT);
 	HW_SPI_DDR |= _BV(HW_SPI_MOSI_BIT);
@@ -76,7 +82,7 @@ static inline void SPImcpDACsend(uint16_t data)
   data |= 0x7000;
 	SPImcpDACtransmit(data);
 	MCP_DAC_CS_PORT |= _BV(MCP_DAC_CS_BIT);
-	// Do not latch immpediately, let's do it at the very beginning of the next interrupt to get consistent timing
+	// Do not latch immediately, let's do it at the very beginning of the next interrupt to get consistent timing
 }
 
 static inline void SPImcpDAC2Asend(uint16_t data)
@@ -99,6 +105,28 @@ static inline void SPImcpDAC2Bsend(uint16_t data)
 	SPImcpDACtransmit(data);
 	MCP_DAC2_CS_PORT |= _BV(MCP_DAC2_CS_BIT);
 	SPImcpDAClatch();
+}
+
+static inline void SPImcpDAC3Asend(uint16_t data)
+{
+	MCP_DAC3_CS_PORT &= ~_BV(MCP_DAC3_CS_BIT);
+	// Sanitize input data and add DAC config MSBs
+	data &= 0x0FFF;
+	data |= 0x7000;
+	SPImcpDACtransmit(data);
+	MCP_DAC3_CS_PORT |= _BV(MCP_DAC3_CS_BIT);
+	// Do not latch immediately, the next common latching at the beginning of the interrupt will be early enough
+}
+
+static inline void SPImcpDAC3Bsend(uint16_t data)
+{
+	MCP_DAC3_CS_PORT &= ~_BV(MCP_DAC3_CS_BIT);
+	// Sanitize input data and add DAC config MSBs
+	data &= 0x0FFF;
+	data |= 0xF000;
+	SPImcpDACtransmit(data);
+	MCP_DAC3_CS_PORT |= _BV(MCP_DAC3_CS_BIT);
+	// Do not latch immediately, the next common latching at the beginning of the interrupt will be early enough
 }
 
 #endif
